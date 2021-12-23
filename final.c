@@ -22,6 +22,14 @@ void clear()
     }
 }
 
+void wait()
+{
+    printf("\nEnter [Enter] key to continue.\n");
+    while((getchar() != '\n'));
+    getchar();
+    clear();
+}
+
 int option_plane()
 {
         int number_plane;
@@ -67,7 +75,7 @@ int *check_max_seats(char n_flight[20], int number_plane, int *value)
     FILE *plane;
     FILE *flight;
   
-    if (!(n_flight == NULL)){
+    if (n_flight != NULL){
         
         flight = fopen(n_flight,"rb");
 	    fread(&number_plane,sizeof(int),1,flight);
@@ -125,9 +133,8 @@ void show_file()
     int array[3];
     char n_flight[20];
 
-    printf("Number of the flight: ");
-    scanf(" %d", &op_flight);
-    sprintf(n_flight,"TP%d",op_flight);  
+    printf("Name of the flight: ");
+    scanf(" %s", n_flight);
 
     flight = fopen(n_flight,"rb");
     value = check_max_seats(n_flight,0,array);
@@ -142,6 +149,99 @@ void show_file()
     }
 }
 
+void mostar_avioes()
+{
+    int array[3]; 
+    int  number_plane, turist = 0, exec = 0, *values;
+
+    if(1){
+
+        number_plane = option_plane();
+        
+        if ((number_plane >= 318) && (number_plane <= 321))
+        {
+            values = check_max_seats(0,number_plane,array);
+            exec = values[0];
+            turist = values[1];
+            
+            printf("Filas executivas: %d\n", exec);
+            printf("Filas turisticas: %d\n\n\n", turist);
+        }else
+        {
+            printf("Opcao invalida\n\n");
+        }
+    }
+
+    wait();
+}
+
+int occupancy_flight(char buffer[20])
+{
+	FILE *flight;
+	FILE *plane;
+	seat all_seats[300];
+    int number_plane, max_seats, ocuppation = 0, op_flight, *values, fila = 0, i = 0;
+    int array[3];
+    char n_flight[20], n_plane[20], letter;
+    
+    if(buffer == NULL){
+
+        printf("Name of the flight: ");
+        scanf(" %s", n_flight);
+        
+        printf("\n");   
+    }else{
+
+        strcpy(n_flight,buffer);
+    }
+
+    flight = fopen(n_flight,"rb");
+
+    if(flight != NULL){
+
+        values = check_max_seats(n_flight,0, array);
+        max_seats = values[2];
+
+        fread(&number_plane,sizeof(int),1,flight);
+        sprintf(n_plane,"Airbus%d",number_plane);
+		plane = fopen(n_plane,"r"); 
+		
+        for (int a = 0; a < max_seats; a++)
+        {
+            fread(&all_seats[a],sizeof(seat),1,flight);
+        }
+		
+        while (!(feof(plane)))
+        {
+            letter = fgetc(plane);
+
+            if ((letter != '\n') && (letter != EOF)){
+            
+            	if (all_seats[i].occupied == '1')
+            	{
+                	letter = '*';
+                    ocuppation++;                	
+            	}
+            	putchar(letter);
+                i++;
+            	
+         	}else{printf("\n");}		  
+        }
+
+        ocuppation =  (ocuppation * 100)/max_seats;
+        printf("\nOcupacao do voo %s e %d%% \n", n_flight, ocuppation);
+        fclose(flight); 
+
+    }else{
+        
+        printf("Ficheiro invalido\n");
+    }
+
+    wait();
+    printf("\n\n");
+    return ocuppation;
+}
+
 void passenger_flight()
 {
     FILE *flight;
@@ -150,11 +250,10 @@ void passenger_flight()
     int array[3];
     char n_flight[20];
     
-    printf("Number of the flight: ");
-   	scanf(" %d", &op_flight);
+    printf("Name of the flight: ");
+   	scanf(" %s", n_flight);
     clear();
-    sprintf(n_flight,"TP%d",op_flight);
-
+    
     flight = fopen(n_flight,"rb");
 
     if(flight != NULL){
@@ -198,74 +297,98 @@ void passenger_flight()
 
     }
 
-    printf("\n\n");
+    wait();
     fclose(flight);
 }
 
-int occupancy_flight(char buffer[20])
+void reserve_seat()
 {
-	FILE *flight;
-	FILE *plane;
+    FILE *flight;
 	seat all_seats[300];
-    int number_plane, max_seats, ocuppation = 0, op_flight, *values, fila = 0, i = 0;
+    int number_plane = 0, max_seats, ocuppation = 0, op_flight, fila = 0, lugar, *values, a, valid=0;
     int array[3];
-    char n_flight[20], n_plane[20], letter;
-    
-    if(buffer == NULL){
-
-        printf("Number of the flight: ");
-        scanf(" %d", &op_flight);
-        sprintf(n_flight,"TP%d",op_flight);   
-    }else{
-
-        strcpy(n_flight,buffer);
-    }
+    char n_flight[20], first_name[20], last_name[20], c_lugar;
+   
+   
+    printf("Name of the flight: ");
+    scanf(" %s", n_flight);
+      
 
     flight = fopen(n_flight,"rb");
 
-    if(flight != NULL){
-
-        values = check_max_seats(n_flight,0, array);
+    if (flight != NULL)
+    {
+        occupancy_flight(n_flight);
+        values = check_max_seats(n_flight,0,array);
         max_seats = values[2];
 
-        fread(&number_plane,sizeof(int),1,flight);
-        sprintf(n_plane,"Airbus%d",number_plane);
-		plane = fopen(n_plane,"r"); 
-		
-        for (int a = 0; a < max_seats; a++)
+        fread(&number_plane,sizeof(int),1,flight); 
+        for (int i = 0; i < max_seats; i++){
+
+            fread(&all_seats[i],sizeof(seat),1,flight);
+        }
+
+        printf("Select row number: ");
+        scanf(" %d", &fila);
+        printf("Select seat letter (a-f): ");
+        scanf(" %c", &c_lugar);
+        lugar = c_lugar - 96;
+
+        if (fila == 0)
         {
-            fread(&all_seats[a],sizeof(seat),1,flight);
-        }
-		
-        while (!(feof(plane))){
-        
-           letter = fgetc(plane);
+            a = lugar - 1;
 
-            if (letter != '\n'){
+        }else if(fila < (values[0]+1))
+        {
+            a = (((fila - 1) * 4) + lugar) - 1;
+
+        }else
+        {
+            a = (((fila - (values[0] + 1)) * 6) + lugar + (values[0] * 4)) - 1;
+        }
+    
+        if (all_seats[a].occupied == '0')
+        {
+            printf("First and last name: ");
+            scanf(" %s %s",first_name, last_name);
+            strcpy(all_seats[a].name,first_name);
+            strcat(all_seats[a].name, " ");
+            strcat(all_seats[a].name,last_name);
+
+            printf("Have you did checked in yes(y) and no(n): ");
+            scanf(" %c", &all_seats[a].checked_in);
+
+            printf("Id luggage: ");
+            scanf(" %d", &all_seats[a].id_luggage);
+
+            printf("Id reservation code: ");
+            scanf(" %d", &all_seats[a].id_reservation_code);
             
-            	if (all_seats[i].occupied == '1')
-            	{
-                	letter = '*';
-                    ocuppation++;                	
-            	}
-            	putchar(letter);
-                i++;
-            	
-         	}else{printf("\n");} 		  
-        }
+            all_seats[a].occupied = '1';
 
-        ocuppation =  (ocuppation * 100)/max_seats;
-        fflush(stdin);
-        printf("Ocupacao do voo %s e %d %", n_flight, ocuppation);
+            valid = 1;
+
+            flight = fopen(n_flight,"wb");
+
+            fwrite(&number_plane,sizeof(int),1,flight);
+            for (int i = 0; i < max_seats; i++)
+            {
+                fwrite(&all_seats[i],sizeof(seat),1,flight);
+            }
+        
+        }else{
+
+            printf("Seat already occupied. Pick another one \n\n");
+        }
+    
+        fclose(flight);
 
     }else{
-        
-        printf("Ficheiro invalido\n");
+
+        printf("Ficheiro invalido\n\n");
     }
 
-    printf("\n\n");
-    fclose(flight);  
-    
+    wait();
 }
 
 void change_seat()
@@ -277,9 +400,8 @@ void change_seat()
     char n_flight[20], first_name[20], last_name[20];
    
    
-    printf("Number of the flight: ");
-    scanf(" %d", &op_flight);
-    sprintf(n_flight,"TP%d",op_flight);  
+    printf("Name of the flight: ");
+    scanf(" %s", n_flight);  
     flight = fopen(n_flight,"rb");
 
     if (flight != NULL)
@@ -370,89 +492,7 @@ void change_seat()
 
         printf("Ficheiro invalido\n\n");
     }
-}
-
-void reserve_seat()
-{
-    FILE *flight;
-	seat all_seats[300];
-    int number_plane = 0, max_seats, ocuppation = 0, op_flight, fila = 0, lugar, *values, a, valid=0;
-    int array[3];
-    char n_flight[20], first_name[20], last_name[20];
-   
-   
-    printf("Number of the flight: ");
-    scanf(" %d", &op_flight);
-    sprintf(n_flight,"TP%d",op_flight);  
-
-    flight = fopen(n_flight,"rb");
-
-    if (flight != NULL)
-    {
-        occupancy_flight(n_flight);
-        values = check_max_seats(n_flight,0,array);
-        max_seats = values[2];
-
-        fread(&number_plane,sizeof(int),1,flight); 
-        for (int i = 0; i < max_seats; i++){
-
-            fread(&all_seats[i],sizeof(seat),1,flight);
-        }
-
-        printf("Fila que deseja: ");
-        scanf(" %d", &fila);
-        printf("Lugar que deseja: ");
-        scanf(" %d", &lugar);
-
-        if(fila < values[0])
-        {
-            a = (((fila - 1) * 4) + lugar) - 1;
-
-        }else
-        {
-            a = (((fila - (values[0] + 1)) * 6) + lugar + (values[0] * 4)) - 1;
-        }
-    
-        if (all_seats[a].occupied == '0')
-        {
-            printf("First and last name: ");
-            scanf(" %s %s",first_name, last_name);
-            strcpy(all_seats[a].name,first_name);
-            strcat(all_seats[a].name, " ");
-            strcat(all_seats[a].name,last_name);
-
-            printf("Have you did checked in yes(y) and no(n): ");
-            scanf(" %c", &all_seats[a].checked_in);
-
-            printf("Id luggage: ");
-            scanf(" %d", &all_seats[a].id_luggage);
-
-            printf("Id reservation code: ");
-            scanf(" %d", &all_seats[a].id_reservation_code);
-            
-            all_seats[a].occupied = '1';
-
-            valid = 1;
-
-            flight = fopen(n_flight,"wb");
-
-            fwrite(&number_plane,sizeof(int),1,flight);
-            for (int i = 0; i < max_seats; i++)
-            {
-                fwrite(&all_seats[i],sizeof(seat),1,flight);
-            }
-        
-        }else{
-
-            printf("Seat already occupied. Pick another one \n\n");
-        }
-    
-        fclose(flight);
-
-    }else{
-
-        printf("Ficheiro invalido\n\n");
-    }
+    wait();
 }
 
 void create_flight()
@@ -463,14 +503,13 @@ void create_flight()
     int op_plane, op_flight,number_plane, max_seats, *values;
     int array[3];
 
-    printf("Number of the flight: ");
-    scanf(" %d", &op_flight);
+    printf("Name of the flight: ");
+    scanf(" %s", n_flight);
 
     number_plane = option_plane();
 
     if((number_plane >= 318) && (number_plane <= 321))
     {
-        sprintf(n_flight,"TP%d",op_flight);
         flight = fopen(n_flight,"wb");
         fwrite(&number_plane,sizeof(int),1,flight);
 
@@ -505,8 +544,8 @@ void fill_flight()
     FILE *nomes = fopen("nomes", "r"); 
     FILE *subnomes = fopen("apelidos", "r");
     
-    printf("Number of the flight: ");
-    scanf(" %d", &op_flight);
+    printf("Name of the flight: ");
+    scanf(" %s", n_flight);
     
     number_plane = option_plane();
 
@@ -514,8 +553,7 @@ void fill_flight()
     {    
         values = check_max_seats(0,number_plane, array);
         max_seats = values[2];
-
-        sprintf(n_flight,"TP%d",op_flight); 
+ 
         flight = fopen(n_flight,"wb");
         fwrite(&number_plane,sizeof(int),1,flight);
         
@@ -574,25 +612,130 @@ void fill_flight()
         
 }
 
-void mostar_avioes()
+void histogram()
 {
-    int array[3]; 
-    int  number_plane, turist = 0, exec = 0, *values;
-
-    number_plane = option_plane();
+    FILE *flight;
+    seat all_seats[300];
+    int op_flight, ocuppation, s_window = 0, s_aisle = 0, s_mid = 0, s_exec = 0, s_turist = 0, row, max_seats, i=0, s= 0, number_plane, pos = 0;
+    int *values;
+    int array[3];
+    int n_buffer[6];
+    char n_flight[20];
+    char c_buffer[6][30] = {"Occupation percentage", "Seats executive", "Seats turist", "Seats window", "Seats middle", "Seats aisle"};
     
-    if ((number_plane >= 318) && (number_plane <= 321))
-    {
-        values = check_max_seats(0,number_plane,array);
-        exec = values[0];
-        turist = values[1];
-        
-        printf("Filas executivas: %d\n", exec);
-        printf("Filas turisticas: %d\n\n\n", turist);
-    }else
-    {
-        printf("Opcao invalida\n\n");
+    printf("Name of the flight: ");
+    scanf(" %s", n_flight);
+    printf("\n");  
+
+    flight = fopen(n_flight, "rb");
+
+    ocuppation = occupancy_flight(n_flight);
+    fread(&number_plane,sizeof(int),1,flight);
+
+    values = check_max_seats(n_flight,0,array);
+    max_seats = values[2];
+
+    for (int a = 0; a < max_seats; a++){
+
+        fread(&all_seats[a],sizeof(seat),1,flight);
     }
+
+    
+    for(i = 1; i < (values[0]+1); i++)
+    {
+        for(;s < (i*4); s++){
+            
+            pos = (i*4)-s-1;
+            
+
+            if(all_seats[s].occupied == '1')
+            {
+                if (!(pos%3))
+                {
+                    s_window++;
+
+                }else if(!(pos%1) || !(pos%2))
+                {
+                    s_aisle++;
+                }
+
+                s_exec++;
+            }
+        }
+    }
+
+
+    for(i = 1; i < (values[1]+1); i++)
+    {
+        for(;s < (i*6); s++){
+            
+            pos = (i*6)-s-1;
+
+            if(all_seats[s].occupied == '1')
+            {
+                if (!(pos%5))
+                {
+                    s_window++;
+
+                }else if(!(pos%2) || !(pos%3))
+                {
+                    s_aisle++;
+
+                }else if(!(pos%1) || !(pos%4))
+                {
+                    s_mid++;
+                }
+
+                s_turist++;
+            }
+        }
+    }
+
+    n_buffer[0] = ocuppation;
+    n_buffer[1] = s_exec;
+    n_buffer[2] = s_turist;
+    n_buffer[3] = s_window;
+    n_buffer[4] = s_mid;
+    n_buffer[5] = s_aisle; 
+
+    printf("Label: '*' - 2 | '.' - 1\n\n");
+
+    printf("\t\t\t");
+    for(i = 2;i < 102; i+=2)
+    {
+        printf("[%d]", i);
+    }
+    printf("\n");
+
+    for(i = 0; i < 6; i++)
+    {
+        if(i == 0){
+
+            printf("%s\t", c_buffer[i]);
+
+        }else{
+
+            printf("%s\t\t", c_buffer[i]);
+        }
+
+        for(int a = 2; a < (n_buffer[i]+1); a+=2)
+        {
+            if(a >= 10)
+            {
+                printf("  * ");
+            }else{
+
+                printf(" * ");
+            }
+        }  
+
+        if(n_buffer[i]%2){printf(" . ");}
+
+        printf("\n");
+    }
+
+    wait();
+    fclose(flight);
 }
 
 void menu()
@@ -658,6 +801,11 @@ void menu()
                 fill_flight();
                 break;
 
+            case 8:
+                clear();
+                histogram();
+                break;
+
             case 10:
                 show_file();
                 break;
@@ -666,9 +814,50 @@ void menu()
     }
 }
 
+void help()
+{
+    printf("\n\t Sintaxe: ./final Flight_name Plane_name\n");
+    printf("\t Example: ./final TP341 A320\n\n");
+    printf("\t Also works with only Plane_name\n");
+    printf("\t Example: ./final A321\n\n");
+    wait();
+}
+
+void check_arg(int argc, char *argv[])
+{
+    char n_flight[20], n_plane[20];
+    
+    
+    
+    switch(argc)
+    {
+        case 2:
+            strcpy(n_plane, argv[1]);
+            mostar_avioes(argv[1]);
+            break;
+        
+        case 3:
+            strcpy(n_plane, argv[2]);
+            strcpy(n_flight, argv[1]);
+            create_flight(argv[1],n_plane);
+            break;
+    }
+}
+
 int main(int argc, char *argv[])
 {    
     srand(time(0));
-    menu();
+
+    if(argc >= 2){
+        
+        if(strstr(argv[1],"-h"))
+        {
+            help();
+        }               
+
+    }else{
+
+        menu();
+    }
     return 0;
 }
