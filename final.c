@@ -125,30 +125,6 @@ int *check_max_seats(char n_flight[20], int number_plane, int *value)
     return value;
 }
 
-void show_file()
-{
-    FILE *flight;
-	seat all_seats[300];
-    int number_plane = 0, max_seats, ocuppation = 0, *value, op_flight;
-    int array[3];
-    char n_flight[20];
-
-    printf("Name of the flight: ");
-    scanf(" %s", n_flight);
-
-    flight = fopen(n_flight,"rb");
-    value = check_max_seats(n_flight,0,array);
-    max_seats = value[2];
-    
-    fread(&number_plane,sizeof(int),1,flight);
-    printf("%d \n", number_plane);
-    for (int i = 0; i < max_seats; i++){
-
-        fread(&all_seats[i],sizeof(seat),1,flight);
-        printf("%c %s %c %d %d \n",all_seats[i].occupied, all_seats[i].name, all_seats[i].checked_in, all_seats[i].id_luggage, all_seats[i].id_reservation_code);
-    }
-}
-
 void mostar_avioes(char buffer[])
 {
     int array[3]; 
@@ -184,7 +160,7 @@ int occupancy_flight(char buffer[20])
 	FILE *flight;
 	FILE *plane;
 	seat all_seats[300];
-    int number_plane, max_seats, ocuppation = 0, op_flight, *values, fila = 0, i = 0;
+    int number_plane, max_seats, ocuppation = 0, op_flight, *values, fila = 1, i = 0, coluna = 1;
     int array[3];
     char n_flight[20], n_plane[20], letter;
     
@@ -217,19 +193,36 @@ int occupancy_flight(char buffer[20])
 		
         while (!(feof(plane)))
         {
-            letter = fgetc(plane);
+            if((fila >= (values[0]+1)) && (coluna == 4))
+            {
+                printf(" |%d| ",fila);
 
-            if ((letter != '\n') && (letter != EOF)){
+            }else if((fila < (values[0]+1)) && (coluna == 3))
+            {
+                printf(" |%d| ",fila);
+
+            }else
+            {  
+                letter = fgetc(plane);
+
+                if ((letter != '\n') && (letter != EOF)){
+    
+                    if (all_seats[i].occupied == '1')
+                    {
+                        letter = '*';
+                        ocuppation++;                	
+                    }
+                    putchar(letter);
+                    i++;
+
+                }else{printf("\n");}
+            }
+           
+            if ((fila < (values[0]+1)) && (coluna == 5)) {fila++;coluna = -1;}
+                
+            if ((fila >= (values[0]+1)) && (coluna == 7)) {fila++;coluna = -1;}
             
-            	if (all_seats[i].occupied == '1')
-            	{
-                	letter = '*';
-                    ocuppation++;                	
-            	}
-            	putchar(letter);
-                i++;
-            	
-         	}else{printf("\n");}		  
+            coluna++;   
         }
 
         ocuppation =  (ocuppation * 100)/max_seats;
@@ -248,7 +241,7 @@ void passenger_flight()
 {
     FILE *flight;
 	seat all_seats[300];
-    int number_plane = 0, max_seats, op_flight, *values, fila = 1, coluna = 0;
+    int number_plane = 0, max_seats, op_flight, *values, fila = 1, coluna = 1;
     int array[3];
     char n_flight[20];
     
@@ -266,7 +259,7 @@ void passenger_flight()
         max_seats = values[2];
         clear();
 
-        printf("Name of flight: %s\n\n", n_flight);
+        printf("Name of flight: %s (%d)\n\n", n_flight, values[0]);
         
 
         fread(&number_plane,sizeof(int),1,flight); 
@@ -274,20 +267,21 @@ void passenger_flight()
         for (int i = 0; i < max_seats; i++){
 
             fread(&all_seats[i],sizeof(seat),1,flight);
-            coluna++;
 
             if ((fila == 1) && (coluna == 1)) {printf("Executive seats \n\n");printf("Row\tSeat\t     Name\n");}
             
             if ((fila == (values[0]+1)) && (coluna == 1)) {printf("\nTurist seats \n\n");printf("Row\tSeat\t     Name\n");}
             
-            if ((fila < values[0]) && (coluna == 4)) {fila++;coluna = 0;}
-            
-            if ((fila >= values[0]) && (coluna == 6)) {fila++;coluna = 0;}
-            
             if (all_seats[i].occupied == '1')
             {
-                printf(" %d \t %c \t%s \n", fila, (coluna+97), all_seats[i].name);
+                printf(" %d \t %c \t%s \n", fila, (coluna+96), all_seats[i].name);
             }
+            
+            if ((fila < (values[0]+1)) && (coluna == 4)) {fila++;coluna = 0;}
+            
+            if ((fila >= (values[0]+1)) && (coluna == 6)) {fila++;coluna = 0;}
+
+            coluna++;
         }
 
     }else{
@@ -811,10 +805,6 @@ void menu()
             case 8:
                 clear();
                 histogram();
-                break;
-
-            case 10:
-                show_file();
                 break;
 
         }
