@@ -199,7 +199,7 @@ int occupancy_flight(char buffer[20])
 
             }else if((fila < (values[0]+1)) && (coluna == 3))
             {
-                printf(" |%d| ",fila);
+                printf("  |%d| ",fila);
 
             }else
             {  
@@ -218,7 +218,7 @@ int occupancy_flight(char buffer[20])
                 }else{printf("\n");}
             }
            
-            if ((fila < (values[0]+1)) && (coluna == 5)) {fila++;coluna = -1;}
+            if ((fila < (values[0]+1)) && (coluna == 5)) {fila++;coluna = -1;printf("\t");}
                 
             if ((fila >= (values[0]+1)) && (coluna == 7)) {fila++;coluna = -1;}
             
