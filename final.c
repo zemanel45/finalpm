@@ -26,7 +26,6 @@ void wait()
 {
     printf("\nEnter [Enter] key to continue.\n");
     while((getchar() != '\n'));
-    getchar();
     clear();
 }
 
@@ -193,13 +192,10 @@ int occupancy_flight(char buffer[20])
 		
         while (!(feof(plane)))
         {
-            if((fila >= (values[0]+1)) && (coluna == 4))
+            
+            if(((fila < (values[0]+1)) && (coluna == 3)) || ((fila >= (values[0]+1)) && (coluna == 4)))
             {
-                printf(" |%d| ",fila);
-
-            }else if((fila < (values[0]+1)) && (coluna == 3))
-            {
-                printf("  |%d| ",fila);
+                printf("  |%d|  ",fila);
 
             }else
             {  
@@ -215,14 +211,14 @@ int occupancy_flight(char buffer[20])
                     putchar(letter);
                     i++;
 
-                }else{printf("\n");}
+                }else{
+                    fila++;
+                    coluna = 0;
+                    printf("\n");
+                }
             }
            
-            if ((fila < (values[0]+1)) && (coluna == 5)) {fila++;coluna = -1;printf("\t");}
-                
-            if ((fila >= (values[0]+1)) && (coluna == 7)) {fila++;coluna = -1;}
-            
-            coluna++;   
+            coluna++;
         }
 
         ocuppation =  (ocuppation * 100)/max_seats;
@@ -327,11 +323,11 @@ void reserve_seat()
         scanf(" %c", &c_lugar);
         lugar = c_lugar - 96;
 
-        if (fila == 0)
+        if(fila == 1)
         {
             a = lugar - 1;
-
-        }else if(fila < (values[0]+1))
+        }
+        else if(fila < (values[0]+1))
         {
             a = (((fila - 1) * 4) + lugar) - 1;
 
@@ -358,8 +354,6 @@ void reserve_seat()
             scanf(" %d", &all_seats[a].id_reservation_code);
             
             all_seats[a].occupied = '1';
-
-            valid = 1;
 
             flight = fopen(n_flight,"wb");
 
@@ -390,7 +384,7 @@ void change_seat()
 	seat all_seats[300];
     int number_plane = 0, max_seats, ocuppation = 0, op_flight, fila = 0, lugar, *values, old_seat, new_seat;
     int array[3];
-    char n_flight[20], first_name[20], last_name[20];
+    char n_flight[20], first_name[20], last_name[20], c_lugar;
    
    
     printf("Name of the flight: ");
@@ -409,18 +403,23 @@ void change_seat()
             fread(&all_seats[i],sizeof(seat),1,flight);
         }
 
-        printf("A sua fila: ");
+        printf("Select row number: ");
         scanf(" %d", &fila);
-        printf("O seu lugar: ");
-        scanf(" %d", &lugar);
-
-        if(fila < values[0])
+        printf("Select seat letter (a-f): ");
+        scanf(" %c", &c_lugar);
+        lugar = c_lugar - 96;
+        
+        if(fila == 1)
         {
-            old_seat = ((fila-1)*4) + lugar;
+            old_seat = lugar;
+        }
+        else if(fila < (values[0]+1))
+        {
+            old_seat = (((fila - 1) * 4) + lugar) - 1;
 
         }else
         {
-            old_seat = ((fila - (values[0] + 1))*6)+ lugar + (values[0]*4);
+            old_seat = (((fila - (values[0] + 1)) * 6) + lugar + (values[0] * 4)) - 1;
         }
     
         if (all_seats[old_seat].occupied == '1')
@@ -432,18 +431,23 @@ void change_seat()
 
             if (strstr(all_seats[old_seat].name,first_name))
             {
-                printf("Fila que deseja: ");
+                printf("Select row number: ");
                 scanf(" %d", &fila);
-                printf("Lugar que deseja: ");
-                scanf(" %d", &lugar);
+                printf("Select seat letter (a-f): ");
+                scanf(" %c", &c_lugar);
+                lugar = c_lugar - 96;
 
-                if(fila < values[0])
+                if(fila == 1)
                 {
-                    new_seat = ((fila-1)*4) + lugar;
+                    new_seat = lugar;
+                }
+                else if(fila < (values[0]+1))
+                {
+                    new_seat = (((fila - 1) * 4) + lugar) - 1;
 
                 }else
                 {
-                    new_seat = ((fila - (values[0] + 1))*6)+ lugar + (values[0]*4);
+                    new_seat = (((fila - (values[0] + 1)) * 6) + lugar + (values[0] * 4)) - 1;
                 }
 
                 if(all_seats[new_seat].occupied == '0')
@@ -468,6 +472,8 @@ void change_seat()
                         fwrite(&all_seats[i],sizeof(seat),1,flight);
                     }
 
+                    printf("Seat changed successfully \n");
+
                 }else
                 {
                     printf("Seat already occupied. Pick another one \n\n");
@@ -476,7 +482,7 @@ void change_seat()
 
         }else{
 
-            printf("Seat not already occupied. Pick another one \n\n");
+            printf("Seat is empty \n\n");
         }
     
         fclose(flight);
@@ -539,8 +545,9 @@ void fill_flight()
     FILE *flight;
     seat all_seats[300];
     int ocuppation_percent, min = 1, random_seat = 0, random_postion_names, random_postion_subnames, max_seats, number_plane, op_flight, *values;
+    int max_namefile = 0, max_subnamefile = 0;
     int array[3];
-    char nome[30],subnome[30],n_flight[12], full_name[40];
+    char nome[30],subnome[30],n_flight[12], full_name[40], a;
     FILE *nomes = fopen("names", "r"); 
     FILE *subnomes = fopen("surnames", "r");
     
@@ -548,6 +555,24 @@ void fill_flight()
     scanf(" %s", n_flight);
     
     number_plane = option_plane();
+
+    while((a = fgetc(nomes)) != EOF)
+    {
+        if((a != '\n') && (a != EOF))
+        {
+            max_namefile++;
+        }
+    }
+
+    while((a = fgetc(subnomes)) != EOF)
+    {
+        if((a != '\n') && (a != EOF))
+        {
+            max_subnamefile++;
+        }
+    }
+
+    printf(" %d %d ", max_subnamefile, max_namefile);
 
     if ((number_plane >= 318) && (number_plane <= 321))
     {    
@@ -565,8 +590,8 @@ void fill_flight()
 
             if (random_seat < ocuppation_percent)
             {
-                random_postion_names = (rand() % (6147 - min + 1)) + min;
-                random_postion_subnames = (rand() % (5845 - min + 1)) + min;
+                random_postion_names = (rand() % (max_namefile - min + 1)) + min;
+                random_postion_subnames = (rand() % (max_subnamefile - min + 1)) + min;
 
                 all_seats[i].id_luggage = (rand() % (200 - 1 + 1)) + 1;
                 all_seats[i].id_reservation_code = (rand() % (200 - 1 + 1)) + 1;
@@ -839,7 +864,7 @@ void check_arg(int argc, char *argv[])
                         n_plane[i] = n_plane[i+1];
                     }
                 }
-
+                
                 pos++;
             }
 
@@ -870,9 +895,7 @@ void check_arg(int argc, char *argv[])
 int main(int argc, char *argv[])
 {    
     srand(time(0));
-    clear();
-
-     
+    clear(); 
 
     if(argc >= 2)
     { 
