@@ -26,7 +26,6 @@ void wait()
 {
     printf("\nEnter [Enter] key to continue.\n");
     while((getchar() != '\n'));
-    getchar();
     clear();
 }
 
@@ -546,8 +545,9 @@ void fill_flight()
     FILE *flight;
     seat all_seats[300];
     int ocuppation_percent, min = 1, random_seat = 0, random_postion_names, random_postion_subnames, max_seats, number_plane, op_flight, *values;
+    int max_namefile = 0, max_subnamefile = 0;
     int array[3];
-    char nome[30],subnome[30],n_flight[12], full_name[40];
+    char nome[30],subnome[30],n_flight[12], full_name[40], a;
     FILE *nomes = fopen("names", "r"); 
     FILE *subnomes = fopen("surnames", "r");
     
@@ -555,6 +555,24 @@ void fill_flight()
     scanf(" %s", n_flight);
     
     number_plane = option_plane();
+
+    while((a = fgetc(nomes)) != EOF)
+    {
+        if((a != '\n') && (a != EOF))
+        {
+            max_namefile++;
+        }
+    }
+
+    while((a = fgetc(subnomes)) != EOF)
+    {
+        if((a != '\n') && (a != EOF))
+        {
+            max_subnamefile++;
+        }
+    }
+
+    printf(" %d %d ", max_subnamefile, max_namefile);
 
     if ((number_plane >= 318) && (number_plane <= 321))
     {    
@@ -572,8 +590,8 @@ void fill_flight()
 
             if (random_seat < ocuppation_percent)
             {
-                random_postion_names = (rand() % (6147 - min + 1)) + min;
-                random_postion_subnames = (rand() % (5845 - min + 1)) + min;
+                random_postion_names = (rand() % (max_namefile - min + 1)) + min;
+                random_postion_subnames = (rand() % (max_subnamefile - min + 1)) + min;
 
                 all_seats[i].id_luggage = (rand() % (200 - 1 + 1)) + 1;
                 all_seats[i].id_reservation_code = (rand() % (200 - 1 + 1)) + 1;
@@ -846,7 +864,7 @@ void check_arg(int argc, char *argv[])
                         n_plane[i] = n_plane[i+1];
                     }
                 }
-
+                
                 pos++;
             }
 
