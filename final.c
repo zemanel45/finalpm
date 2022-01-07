@@ -25,6 +25,7 @@ void clear()
 void wait()
 {
     printf("\nEnter [Enter] key to continue.\n");
+    getchar();
     while((getchar() != '\n'));
     clear();
 }
@@ -113,8 +114,8 @@ int *check_max_seats(char n_flight[20], int number_plane, int *value)
 
     }else 
     {
-        printf("Erro no check max");
-        exit(1);
+        printf("Invalid File");
+        return 1;
     }
 
     value[0] = exec;
@@ -144,11 +145,11 @@ void mostar_avioes(char buffer[])
         exec = values[0];
         turist = values[1];
         
-        printf("\nFilas executivas: %d\n", exec);
-        printf("Filas turisticas: %d\n", turist);
+        printf("\nExecutive rows: %d\n", exec);
+        printf("Turist rows: %d\n", turist);
     }else
     {
-        printf("\nOpcao invalida\n");
+        printf("\nInvalid option\n");
     }
     
     wait();
@@ -222,12 +223,12 @@ int occupancy_flight(char buffer[20])
         }
 
         ocuppation =  (ocuppation * 100)/max_seats;
-        printf("\nOcupacao do voo %s e %d%% \n", n_flight, ocuppation);
+        printf("\nFlight occupation percentage of %s is %d%% \n", n_flight, ocuppation);
         fclose(flight); 
 
     }else{
         
-        printf("Ficheiro invalido\n");
+        printf("Invalid File\n");
     }
 
     return ocuppation;
@@ -282,7 +283,7 @@ void passenger_flight()
 
     }else{
         
-        printf("Ficheiro invalido");
+        printf("Invalid File\n\n");
 
     }
 
@@ -322,57 +323,64 @@ void reserve_seat()
         printf("Select seat letter (a-f): ");
         scanf(" %c", &c_lugar);
         lugar = c_lugar - 96;
-
-        if(fila == 1)
-        {
-            a = lugar - 1;
-        }
-        else if(fila < (values[0]+1))
-        {
-            a = (((fila - 1) * 4) + lugar) - 1;
-
-        }else
-        {
-            a = (((fila - (values[0] + 1)) * 6) + lugar + (values[0] * 4)) - 1;
-        }
-    
-        if (all_seats[a].occupied == '0')
-        {
-            printf("First and last name: ");
-            scanf(" %s %s",first_name, last_name);
-            strcpy(all_seats[a].name,first_name);
-            strcat(all_seats[a].name, " ");
-            strcat(all_seats[a].name,last_name);
-
-            printf("Have you did checked in yes(y) and no(n): ");
-            scanf(" %c", &all_seats[a].checked_in);
-
-            printf("Id luggage: ");
-            scanf(" %d", &all_seats[a].id_luggage);
-
-            printf("Id reservation code: ");
-            scanf(" %d", &all_seats[a].id_reservation_code);
-            
-            all_seats[a].occupied = '1';
-
-            flight = fopen(n_flight,"wb");
-
-            fwrite(&number_plane,sizeof(int),1,flight);
-            for (int i = 0; i < max_seats; i++)
-            {
-                fwrite(&all_seats[i],sizeof(seat),1,flight);
-            }
         
-        }else{
-
-            printf("Seat already occupied. Pick another one \n\n");
-        }
-    
+		if((lugar >= 0) && (lugar <= 6) && (fila >= 1) && (fila <= values[0]+1))
+		{
+        	if(fila == 1)
+        	{
+            	a = lugar - 1;
+        	}
+        	else if(fila < (values[0]+1))
+        	{
+            	a = (((fila - 1) * 4) + lugar) - 1;
+	
+        	}else
+        	{
+            	a = (((fila - (values[0] + 1)) * 6) + lugar + (values[0] * 4)) - 1;
+        	}
+    	
+        	if (all_seats[a].occupied == '0')
+        	{
+            	printf("First and last name: ");
+            	scanf(" %s %s",first_name, last_name);
+            	strcpy(all_seats[a].name,first_name);
+            	strcat(all_seats[a].name, " ");
+            	strcat(all_seats[a].name,last_name);
+	
+            	printf("Have you did checked in yes(y) and no(n): ");
+            	scanf(" %c", &all_seats[a].checked_in);
+	
+            	printf("Id luggage: ");
+            	scanf(" %d", &all_seats[a].id_luggage);
+	
+            	printf("Id reservation code: ");
+            	scanf(" %d", &all_seats[a].id_reservation_code);
+            	
+            	all_seats[a].occupied = '1';
+	
+            	flight = fopen(n_flight,"wb");
+	
+            	fwrite(&number_plane,sizeof(int),1,flight);
+            	for (int i = 0; i < max_seats; i++)
+            	{
+                	fwrite(&all_seats[i],sizeof(seat),1,flight);
+            	}
+        	
+        	}else{
+	
+            	printf("Seat already occupied. Pick another one \n\n");
+        	}
+    	
+    	}else{
+    	
+    		printf("Seat invalid");
+    	}
+        	
         fclose(flight);
-
+               
     }else{
 
-        printf("Ficheiro invalido\n\n");
+        printf("Invalid File\n\n");
     }
 
     wait();
@@ -409,87 +417,105 @@ void change_seat()
         scanf(" %c", &c_lugar);
         lugar = c_lugar - 96;
         
-        if(fila == 1)
+        if((lugar >= 0) && (lugar <= 6) && (fila >= 1) && (fila <= values[0]+1))
         {
-            old_seat = lugar;
-        }
-        else if(fila < (values[0]+1))
-        {
-            old_seat = (((fila - 1) * 4) + lugar) - 1;
-
-        }else
-        {
-            old_seat = (((fila - (values[0] + 1)) * 6) + lugar + (values[0] * 4)) - 1;
-        }
+        	if(fila == 1)
+        	{
+            	old_seat = lugar;
+        	}
+        	else if(fila < (values[0]+1))
+        	{
+            	old_seat = (((fila - 1) * 4) + lugar) - 1;
+	
+        	}else
+        	{
+            	old_seat = (((fila - (values[0] + 1)) * 6) + lugar + (values[0] * 4)) - 1;
+        	}
+    	
+        	if (all_seats[old_seat].occupied == '1')
+        	{
+            	printf("Verify first and last name: ");
+            	scanf(" %s %s",first_name, last_name);
+            	strcat(first_name, " ");
+            	strcat(first_name,last_name);
+	
+            	if (strstr(all_seats[old_seat].name,first_name))
+            	{
+                	printf("Select row number: ");
+                	scanf(" %d", &fila);
+                	printf("Select seat letter (a-f): ");
+                	scanf(" %c", &c_lugar);
+                	lugar = c_lugar - 96;
+					
+					if((lugar >= 0) && (lugar <= 6) && (fila >= 1) && (fila <= values[0]+1))
+					{
+                		if(fila == 1)
+                		{
+                    		new_seat = lugar;
+                		}
+                		else if(fila < (values[0]+1))
+                		{
+                    		new_seat = (((fila - 1) * 4) + lugar) - 1;
+		
+                		}else
+                		{
+                    		new_seat = (((fila - (values[0] + 1)) * 6) + lugar + (values[0] * 4)) - 1;
+                		}
+		
+                		if(all_seats[new_seat].occupied == '0')
+                		{
+                    		all_seats[new_seat].checked_in = all_seats[old_seat].checked_in;
+                    		all_seats[new_seat].id_luggage = all_seats[old_seat].id_luggage;
+                    		all_seats[new_seat].id_reservation_code = all_seats[old_seat].id_reservation_code;
+                    		strcpy(all_seats[new_seat].name,all_seats[old_seat].name);
+                    		all_seats[new_seat].occupied = '1';
+		
+                    		all_seats[old_seat].occupied = '0';        
+                    		strcpy(all_seats[old_seat].name," ");
+                    		all_seats[old_seat].checked_in = ' ';   
+                    		all_seats[old_seat].id_luggage = 0;
+                    		all_seats[old_seat].id_reservation_code = 0;
+                    		
+		
+                    		flight = fopen(n_flight,"wb");
+                    		fwrite(&number_plane,sizeof(int),1,flight);
+                    		for (int i = 0; i < max_seats; i++)
+                    		{
+                        		fwrite(&all_seats[i],sizeof(seat),1,flight);
+                    		}
+		
+                    		printf("Seat changed successfully \n\n");
+		
+                		}else
+                		{
+                    		printf("Seat already occupied. Pick another one \n\n");
+                		}
+                		
+                	}else{
+                	
+                		printf("Invalid Seat");
+                	}	
+            		
+            	}else{
+            	
+            		printf("Wrong name\n\n");
+            	}
+	
+        	}else{
+	
+            	printf("Seat is empty \n\n");
+        	}
     
-        if (all_seats[old_seat].occupied == '1')
-        {
-            printf("Verify first and last name: ");
-            scanf(" %s %s",first_name, last_name);
-            strcat(first_name, " ");
-            strcat(first_name,last_name);
-
-            if (strstr(all_seats[old_seat].name,first_name))
-            {
-                printf("Select row number: ");
-                scanf(" %d", &fila);
-                printf("Select seat letter (a-f): ");
-                scanf(" %c", &c_lugar);
-                lugar = c_lugar - 96;
-
-                if(fila == 1)
-                {
-                    new_seat = lugar;
-                }
-                else if(fila < (values[0]+1))
-                {
-                    new_seat = (((fila - 1) * 4) + lugar) - 1;
-
-                }else
-                {
-                    new_seat = (((fila - (values[0] + 1)) * 6) + lugar + (values[0] * 4)) - 1;
-                }
-
-                if(all_seats[new_seat].occupied == '0')
-                {
-                    all_seats[new_seat].checked_in = all_seats[old_seat].checked_in;
-                    all_seats[new_seat].id_luggage = all_seats[old_seat].id_luggage;
-                    all_seats[new_seat].id_reservation_code = all_seats[old_seat].id_reservation_code;
-                    strcpy(all_seats[new_seat].name,all_seats[old_seat].name);
-                    all_seats[new_seat].occupied = '1';
-
-                    all_seats[old_seat].occupied = '0';        
-                    strcpy(all_seats[old_seat].name," ");
-                    all_seats[old_seat].checked_in = ' ';   
-                    all_seats[old_seat].id_luggage = 0;
-                    all_seats[old_seat].id_reservation_code = 0;
-                    
-
-                    flight = fopen(n_flight,"wb");
-                    fwrite(&number_plane,sizeof(int),1,flight);
-                    for (int i = 0; i < max_seats; i++)
-                    {
-                        fwrite(&all_seats[i],sizeof(seat),1,flight);
-                    }
-
-                    printf("Seat changed successfully \n");
-
-                }else
-                {
-                    printf("Seat already occupied. Pick another one \n\n");
-                }
-            }
-
         }else{
-
-            printf("Seat is empty \n\n");
+        	
+        	printf("Invalid Seat\n\n");
         }
-    
+        
         fclose(flight);
 
     }else{
 
-        printf("Ficheiro invalido\n\n");
+        printf("Invalid File\n\n");
     }
     wait();
 }
@@ -534,7 +560,7 @@ void create_flight(char buffer_f[],char buffer_p[])
         fclose(flight);
 
     }else{
-        printf("Opcao invalida\n\n");
+        printf("Invalid option\n\n");
     }
 
     clear();  
@@ -571,8 +597,6 @@ void fill_flight()
             max_subnamefile++;
         }
     }
-
-    printf(" %d %d ", max_subnamefile, max_namefile);
 
     if ((number_plane >= 318) && (number_plane <= 321))
     {    
@@ -629,7 +653,7 @@ void fill_flight()
 
     }else
     {
-        printf("Opcao invalida\n\n");
+        printf("Invalid option\n\n");
     }
 
     fclose(nomes);
@@ -723,10 +747,8 @@ void histogram()
     n_buffer[4] = s_mid;
     n_buffer[5] = s_aisle; 
 
-    printf("Label: '*' - 2 | '.' - 1\n\n");
-
     printf("\t\t\t");
-    for(i = 2;i < 102; i+=2)
+    for(i = 3;i < 104; i+=3)
     {
         printf("[%d]", i);
     }
@@ -743,7 +765,7 @@ void histogram()
             printf("%s\t\t", c_buffer[i]);
         }
 
-        for(int a = 2; a < (n_buffer[i]+1); a+=2)
+        for(int a = 3; a < (n_buffer[i]+1); a+=3)
         {
             if(a >= 10)
             {
@@ -753,8 +775,6 @@ void histogram()
                 printf(" * ");
             }
         }  
-
-        if(n_buffer[i]%2){printf(" . ");}
 
         printf("\n");
     }
@@ -831,17 +851,22 @@ void menu()
                 clear();
                 histogram();
                 break;
+                
+            case 9:
+            	printf("Run another program to create files names and surnames\n\n");
+            	wait();
+            	break;
 
         }
     }
 }
 
-void help()
+void help(char *argv[])
 {
-    printf("\n\t Sintaxe: ./final Flight_name Plane_name\n");
-    printf("\t Example: ./final TP341 A320\n\n");
+    printf("\n\t Sintaxe: %s Flight_name Plane_name\n", argv[0]);
+    printf("\t Example: %s TP341 A320\n\n", argv[0]);
     printf("\t Also works with only Plane_name\n");
-    printf("\t Example: ./final A321\n\n");
+    printf("\t Example: %s A321\n\n", argv[0]);
     wait();
 }
 
@@ -901,7 +926,7 @@ int main(int argc, char *argv[])
     { 
         if(strstr(argv[1],"-h"))
         {
-            help();
+            help(argv);
 
         }else{
 
@@ -909,7 +934,6 @@ int main(int argc, char *argv[])
             menu();
         }
         
-
     }else{
   
         menu();
